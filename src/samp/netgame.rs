@@ -1,14 +1,15 @@
-use std::ptr::NonNull;
 use std::net::SocketAddr;
+use std::ptr::NonNull;
 
-use super::{v037, v037r3};
-use super::version::{Version, version};
-use detour::GenericDetour;
+use super::version::{version, Version};
+use super::{v037, v037r3, v03dlr1};
 use crate::samp::Gamestate;
+use detour::GenericDetour;
 
 pub struct NetGame<'a> {
     netgame_v1: Option<&'a mut v037::CNetGame>,
     netgame_v3: Option<&'a mut v037r3::CNetGame>,
+    netgame_v03dl: Option<&'a mut v03dlr1::CNetGame>,
 }
 
 impl<'a> NetGame<'a> {
@@ -17,11 +18,19 @@ impl<'a> NetGame<'a> {
             Version::V037 => NetGame {
                 netgame_v1: v037::CNetGame::get(),
                 netgame_v3: None,
+                netgame_v03dl: None,
             },
 
             Version::V037R3 => NetGame {
                 netgame_v1: None,
                 netgame_v3: v037r3::CNetGame::get(),
+                netgame_v03dl: None,
+            },
+
+            Version::V03DLR1 => NetGame {
+                netgame_v1: None,
+                netgame_v3: None,
+                netgame_v03dl: v03dlr1::CNetGame::get(),
             },
 
             _ => panic!("Unknown SA:MP version"),
@@ -32,6 +41,10 @@ impl<'a> NetGame<'a> {
         match version() {
             Version::V037 => self.netgame_v1.as_ref().and_then(|netgame| netgame.addr()),
             Version::V037R3 => self.netgame_v3.as_ref().and_then(|netgame| netgame.addr()),
+            Version::V03DLR1 => self
+                .netgame_v03dl
+                .as_ref()
+                .and_then(|netgame| netgame.addr()),
             _ => None,
         }
     }
@@ -40,6 +53,7 @@ impl<'a> NetGame<'a> {
         let address = match version() {
             Version::V037 => 0x9380,
             Version::V037R3 => 0x9510,
+            Version::V03DLR1 => 0x9570,
             _ => return,
         };
 
@@ -47,15 +61,14 @@ impl<'a> NetGame<'a> {
             let ptr = super::handle().add(address);
             let func: extern "thiscall" fn(this: *mut ()) = std::mem::transmute(ptr);
 
-            GenericDetour::new(func, cnetgame_destroy)
-                .map(|hook| {
-                    let _ = hook.enable();
+            GenericDetour::new(func, cnetgame_destroy).map(|hook| {
+                let _ = hook.enable();
 
-                    DESTROY_HOOK = Some(CNetGameDestroyHook {
-                        hook,
-                        callback: Box::new(callback),
-                    });
+                DESTROY_HOOK = Some(CNetGameDestroyHook {
+                    hook,
+                    callback: Box::new(callback),
                 });
+            });
         }
     }
 
@@ -63,6 +76,7 @@ impl<'a> NetGame<'a> {
         let address = match version() {
             Version::V037 => 0xA060,
             Version::V037R3 => 0xA1E0,
+            Version::V03DLR1 => 0xA230,
             _ => return,
         };
 
@@ -70,15 +84,14 @@ impl<'a> NetGame<'a> {
             let ptr = super::handle().add(address);
             let func: extern "thiscall" fn(*mut ()) = std::mem::transmute(ptr);
 
-            GenericDetour::new(func, cnetgame_reconnect)
-                .map(|hook| {
-                    let _ = hook.enable();
+            GenericDetour::new(func, cnetgame_reconnect).map(|hook| {
+                let _ = hook.enable();
 
-                    RECONNECT_HOOK = Some(CNetGameReconnectHook {
-                        hook,
-                        callback: Box::new(callback),
-                    });
+                RECONNECT_HOOK = Some(CNetGameReconnectHook {
+                    hook,
+                    callback: Box::new(callback),
                 });
+            });
         }
     }
 
@@ -86,6 +99,7 @@ impl<'a> NetGame<'a> {
         let address = match version() {
             Version::V037 => 0xA890,
             Version::V037R3 => 0xAA20,
+            Version::V03DLR1 => 0xAA60,
             _ => return,
         };
 
@@ -93,15 +107,14 @@ impl<'a> NetGame<'a> {
             let ptr = super::handle().add(address);
             let func: extern "thiscall" fn(*mut (), *mut ()) = std::mem::transmute(ptr);
 
-            GenericDetour::new(func, cnetgame_connect)
-                .map(|hook| {
-                    let _ = hook.enable();
+            GenericDetour::new(func, cnetgame_connect).map(|hook| {
+                let _ = hook.enable();
 
-                    STATE_HOOK = Some(CNetGameStateHook {
-                        hook,
-                        callback: Box::new(callback),
-                    });
+                STATE_HOOK = Some(CNetGameStateHook {
+                    hook,
+                    callback: Box::new(callback),
                 });
+            });
         }
     }
 }
