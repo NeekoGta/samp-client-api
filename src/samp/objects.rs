@@ -30,8 +30,8 @@ impl<'a> Object<'a> {
     fn new_dl(object: &'a dl::CObject) -> Object<'a> {
         Object {
             object_dl: Some(object),
-            object_v1: None,
             object_v3: None,
+            object_v1: None,
         }
     }
 
