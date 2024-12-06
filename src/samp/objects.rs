@@ -38,7 +38,7 @@ impl<'a> Object<'a> {
     pub fn entity(&self) -> Option<&'a mut CObject> {
         let v1 = self.object_v1.map(|obj| obj._base.m_pGameEntity as *mut CObject);
         let v3 = self.object_v3.map(|obj| obj._base.m_pGameEntity as *mut CObject);
-        let dl = self.objefct_dl.map(|obj| obj._base.m_pGameEntity as *mut CObject);
+        let dl = self.object_dl.map(|obj| obj._base.m_pGameEntity as *mut CObject);
 
         v1.or(v3).or(dl)
             .filter(|ptr| !ptr.is_null())
