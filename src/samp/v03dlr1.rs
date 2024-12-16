@@ -12,7 +12,8 @@ pub const CGAME: usize = 0x2ACA3C;
 pub const CGAME_SETCURSORMODE: usize = 0xA0530;
 pub const CGAME_PROCESSINPUTENABLING: usize = 0xA0410;
 pub const CDIALOG: usize = 0x2AC9E0;
-pub const CDEATHWINDOW_DRAW: usize = 0x69D20;
+// pub const CDEATHWINDOW_DRAW: usize = 0x69D20;
+pub const CDEATHWINDOW_DRAW: usize = 0x6A2E0;
 
 const SPEC_MODE_VEHICLE: i8 = 3;
 const SPEC_MODE_PLAYER: i8 = 4;
@@ -659,8 +660,8 @@ pub struct Accessory {
 #[repr(C, packed)]
 pub struct CObjectPool {
     pub m_nLargestId: ::std::os::raw::c_int,
-    pub m_bNotEmpty: [BOOL; 1000usize],
-    pub m_pObject: [*mut CObject; 1000usize],
+    pub m_bNotEmpty: [BOOL; 2100usize],
+    pub m_pObject: [*mut CObject; 2100usize],
 }
 
 #[repr(C, packed)]
