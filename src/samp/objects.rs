@@ -40,7 +40,7 @@ impl<'a> Object<'a> {
         let v3 = self.object_v3.map(|obj| obj._base.m_pGameEntity as *mut CObject);
         let dl = self.object_dl.map(|obj| obj._base.m_pGameEntity as *mut CObject);
 
-        v1.or(v3).or(dl)
+        v1.or(dl)
             .filter(|ptr| !ptr.is_null())
             .map(|ptr| unsafe { &mut *ptr })
     }
